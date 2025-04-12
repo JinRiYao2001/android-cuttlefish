@@ -16,15 +16,12 @@ include /usr/share/dpkg/buildflags.mk
 	dh $@ --with=config-package
 
 override_dh_auto_build:
-	# Enable git and curl verbose output for debugging git clone
-	export GIT_TRACE=1 && \
-	export GIT_CURL_VERBOSE=1 && \
-
 	# First, install init services
 	dh_installinit --name=cuttlefish-host-resources
 	dh_installinit
 
-	# Now perform the bazel build
+	# Now perform the bazel build with git clone debug output enabled
+	GIT_TRACE=1 GIT_CURL_VERBOSE=1 \
 	cd cvd && bazel build --linkopt="-Wl,--build-id=sha1" 'cuttlefish/package:cvd' \
 		--spawn_strategy=local --workspace_status_command=../stamp_helper.sh \
 		--build_tag_filters=-clang-tidy --verbose_failures --experimental_repo_debug
